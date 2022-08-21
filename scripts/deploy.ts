@@ -24,17 +24,18 @@ async function main() {
 
   console.log("Account balance:", (await deployer.getBalance()).toString());
 
-  const Token = await ethers.getContractFactory("Token");
-  const token = await Token.deploy();
-  await token.deployed();
+  const contractName = "Token";
+  const contractFactory = await ethers.getContractFactory(contractName);
+  const contract = await contractFactory.deploy();
+  await contract.deployed();
 
-  console.log("Token address:", token.address);
+  console.log(contractName + " contract address:", contract.address);
 
   // We also save the contract's artifacts and address in the frontend directory
-  saveFrontendFiles(token);
+  saveFrontendFiles(contract, contractName);
 }
 
-function saveFrontendFiles(token: Contract) {
+function saveFrontendFiles(contract: Contract, contractName: string) {
   const fs = require("fs");
   const contractsDir = path.join(
     __dirname,
@@ -48,16 +49,21 @@ function saveFrontendFiles(token: Contract) {
     fs.mkdirSync(contractsDir);
   }
 
+  // デプロイしたコントラクトのアドレスをアドレスリストに追加する
+  const contractAddressPath = path.join(contractsDir, "contract-address.json");
+  const addressJson = JSON.parse(fs.readFileSync(contractAddressPath));
+  addressJson[contractName] = contract.address;
+
   fs.writeFileSync(
-    path.join(contractsDir, "contract-address.json"),
-    JSON.stringify({ Token: token.address }, undefined, 2)
+    contractAddressPath,
+    JSON.stringify(addressJson, undefined, 2)
   );
 
-  const TokenArtifact = artifacts.readArtifactSync("Token");
-
+  // フロントエンド用にABIなどのコントラクトの情報を保存する
+  const artifact = artifacts.readArtifactSync(contractName);
   fs.writeFileSync(
-    path.join(contractsDir, "Token.json"),
-    JSON.stringify(TokenArtifact, null, 2)
+    path.join(contractsDir, contractName + ".json"),
+    JSON.stringify(artifact, null, 2)
   );
 }
 
