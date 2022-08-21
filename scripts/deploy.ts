@@ -24,11 +24,20 @@ async function main() {
 
   console.log("Account balance:", (await deployer.getBalance()).toString());
 
-  const contractName = "Token";
-  const contractFactory = await ethers.getContractFactory(contractName);
-  const contract = await contractFactory.deploy();
-  await contract.deployed();
+  const deployParams: { contractName: string; constructorArgs: any[] }[] = [
+    { contractName: "Token", constructorArgs: [] },
+    { contractName: "MyErc721", constructorArgs: ["HelloNft", "ODEN"] },
+  ];
 
+  for (const deployParam of deployParams) {
+    await deployContract(deployParam.contractName, deployParam.constructorArgs);
+  }
+}
+
+async function deployContract(contractName: string, args: any[] = []) {
+  const contractFactory = await ethers.getContractFactory(contractName);
+  const contract = await contractFactory.deploy(...args);
+  await contract.deployed();
   console.log(contractName + " contract address:", contract.address);
 
   // We also save the contract's artifacts and address in the frontend directory
