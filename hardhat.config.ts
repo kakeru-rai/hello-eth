@@ -15,7 +15,7 @@ const GOERLI_PRIVATE_KEY = process.env.GOERLI_PRIVATE_KEY!;
 
 /** @type import('hardhat/config').HardhatUserConfig */
 const config: HardhatUserConfig = {
-  solidity: "0.8.9",
+  solidity: "0.8.12",
   networks: {
     goerli: {
       url: `https://eth-goerli.alchemyapi.io/v2/${ALCHEMY_API_KEY}`,
