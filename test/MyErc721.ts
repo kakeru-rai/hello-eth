@@ -132,7 +132,7 @@ describe("MyErc721 contract", function () {
       }
     });
 
-    it("自分の保有しているNFTを一覧できる", async function () {
+    it("インデックスを使ってトークンIDを取得できる", async function () {
       const { contract, owner, addr1, addr2 } = await loadFixture(
         deployTokenFixture
       );
@@ -141,6 +141,7 @@ describe("MyErc721 contract", function () {
       const TOKEN_ID1 = 111;
       await contractAddr1.safeMint(addr1.address, TOKEN_ID1);
       expect(await contractAddr1.totalSupply()).to.equal(1);
+      expect(await contractAddr1.balanceOf(addr1.address)).to.equal(1);
 
       const TOKEN_ID2 = 222;
       const TOKEN_ID3 = 333;
@@ -148,6 +149,10 @@ describe("MyErc721 contract", function () {
       await contractAddr2.safeMint(addr2.address, TOKEN_ID2);
       await contractAddr2.safeMint(addr2.address, TOKEN_ID3);
       expect(await contractAddr2.totalSupply()).to.equal(3);
+      expect(await contractAddr2.balanceOf(addr2.address)).to.equal(
+        2,
+        "所有しているトークンの数が確認できる"
+      );
 
       expect(await contractAddr2.tokenByIndex(0)).to.equal(
         TOKEN_ID1,
@@ -167,6 +172,26 @@ describe("MyErc721 contract", function () {
       ).to.equal(
         TOKEN_ID2,
         "tokenByIndexと違ってオーナーごとの通し番号でトークンを取得する"
+      );
+    });
+
+    it("トークンIDから保有者アドレスを取得できる", async function () {
+      const { contract, owner, addr1, addr2 } = await loadFixture(
+        deployTokenFixture
+      );
+
+      const TOKEN_ID1 = 111;
+      let contractAddr1 = contract.connect(addr1);
+      await contractAddr1.safeMint(addr1.address, TOKEN_ID1);
+      expect(await contractAddr1.ownerOf(TOKEN_ID1)).to.equal(
+        addr1.address,
+        "自分のトークン所有者を取得できる"
+      );
+
+      let contractAddr2 = contract.connect(addr2);
+      expect(await contractAddr2.ownerOf(TOKEN_ID1)).to.equal(
+        addr1.address,
+        "他人のトークン所有者を取得できる"
       );
     });
   });
